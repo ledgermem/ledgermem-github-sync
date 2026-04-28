@@ -13,7 +13,38 @@ export function buildApp(deps: {
 }): express.Express {
   const webhooks = new Webhooks({ secret: deps.webhookSecret });
 
+  // Only re-ingest on actions that change the title/body/state of the
+  // entity. GitHub fires `issues` for every label, assignee, milestone, and
+  // pin change — without this filter we'd push duplicate memories for every
+  // triage touch and quickly burn the embedding budget on no-op churn.
+  const ISSUE_ACTIONS = new Set([
+    "opened",
+    "edited",
+    "reopened",
+    "closed",
+    "deleted",
+    "transferred",
+  ]);
+  const PR_ACTIONS = new Set([
+    "opened",
+    "edited",
+    "reopened",
+    "closed",
+    "ready_for_review",
+    "synchronize",
+  ]);
+  const DISCUSSION_ACTIONS = new Set([
+    "created",
+    "edited",
+    "reopened",
+    "closed",
+    "deleted",
+    "answered",
+    "unanswered",
+  ]);
+
   webhooks.on("issues", async ({ payload }) => {
+    if (!ISSUE_ACTIONS.has(payload.action)) return;
     const issue = payload.issue;
     await ingestEntity(deps.memory, {
       entityType: "issue",
@@ -30,6 +61,7 @@ export function buildApp(deps: {
   });
 
   webhooks.on("pull_request", async ({ payload }) => {
+    if (!PR_ACTIONS.has(payload.action)) return;
     const pr = payload.pull_request;
     await ingestEntity(deps.memory, {
       entityType: "pull_request",
@@ -57,6 +89,7 @@ export function buildApp(deps: {
   });
 
   webhooks.on("discussion", async ({ payload }) => {
+    if (!DISCUSSION_ACTIONS.has(payload.action)) return;
     const d = payload.discussion;
     await ingestEntity(deps.memory, {
       entityType: "discussion",

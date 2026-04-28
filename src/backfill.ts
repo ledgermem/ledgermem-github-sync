@@ -16,7 +16,27 @@ export interface BackfillOptions {
 export interface BackfillResult {
   issues: number;
   pullRequests: number;
+  /**
+   * Most recent `updated_at` observed across all ingested items. Callers
+   * persisting this for use as the next run's `since` should bump it by 1ms
+   * via {@link nextSince} — GitHub's `since` filter is inclusive, so
+   * passing the raw watermark re-ingests the boundary item every run.
+   */
   lastUpdatedAt: string | null;
+}
+
+/**
+ * GitHub's `issues.listForRepo` `since` filter returns items updated at
+ * **or after** the given timestamp. Persisting `lastUpdatedAt` directly as
+ * the next cursor causes the boundary item to be re-fetched and re-ingested
+ * on every subsequent run. Add 1ms so the next run starts strictly after
+ * the last item we saw.
+ */
+export function nextSince(lastUpdatedAt: string | null): string | null {
+  if (!lastUpdatedAt) return null;
+  const t = Date.parse(lastUpdatedAt);
+  if (!Number.isFinite(t)) return lastUpdatedAt;
+  return new Date(t + 1).toISOString();
 }
 
 export async function backfillIssuesAndPRs(
