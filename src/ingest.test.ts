@@ -68,6 +68,7 @@ describe("backfillIssuesAndPRs", () => {
     });
     expect(result.issues).toBe(1);
     expect(result.pullRequests).toBe(1);
+    expect(result.lastUpdatedAt).toBe("2025-01-02");
     expect(add).toHaveBeenCalledTimes(2);
   });
 });
