@@ -24,6 +24,9 @@ export async function ingestEntity(
   entity: GitHubEntity,
 ): Promise<void> {
   const content = `${entity.title}\n\n${entity.body}`.trim();
+  // Skip entities with no real content — empty title+body pairs happen for
+  // bot-created stubs and would just pollute retrieval.
+  if (content.length === 0) return;
   await memory.add(content, {
     metadata: {
       source: "github",

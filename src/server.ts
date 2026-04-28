@@ -45,6 +45,17 @@ export function buildApp(deps: {
     });
   });
 
+  // Force pushes rewrite history; the previously-ingested commits / PR refs
+  // may now point at orphaned SHAs. Log so operators can trigger a rebackfill.
+  webhooks.on("push", async ({ payload }) => {
+    if (payload.forced) {
+      process.stderr.write(
+        `[github-sync] forced push on ${payload.ref} in ${deps.owner}/${deps.repo}: ` +
+          `${payload.before} -> ${payload.after}. Re-run backfill to reconcile.\n`,
+      );
+    }
+  });
+
   webhooks.on("discussion", async ({ payload }) => {
     const d = payload.discussion;
     await ingestEntity(deps.memory, {
@@ -62,11 +73,17 @@ export function buildApp(deps: {
   });
 
   const app = express();
-  app.use(express.json({
-    verify: (req, _res, buf) => {
-      (req as Request & { rawBody: string }).rawBody = buf.toString("utf8");
-    },
-  }));
+  // Cap webhook payload size: GitHub's documented max is ~25MB, so 32MB is a
+  // safe ceiling. Without a limit, express defaults to 100kb and large
+  // discussion bodies / PR diffs are silently rejected.
+  app.use(
+    express.json({
+      limit: "32mb",
+      verify: (req, _res, buf) => {
+        (req as Request & { rawBody: string }).rawBody = buf.toString("utf8");
+      },
+    }),
+  );
 
   app.get("/healthz", (_req, res) => {
     res.json({ ok: true });
