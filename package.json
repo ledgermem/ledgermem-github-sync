@@ -1,7 +1,7 @@
 {
-  "name": "@ledgermem/github-sync",
+  "name": "@getmnemo/github-sync",
   "version": "0.1.0",
-  "description": "LedgerMem GitHub connector — backfill + webhook sync of issues, PRs, and discussions.",
+  "description": "Mnemo GitHub connector — backfill + webhook sync of issues, PRs, and discussions.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -19,7 +19,7 @@
     "node": ">=22"
   },
   "dependencies": {
-    "@ledgermem/memory": "^0.1.0",
+    "@getmnemo/memory": "^0.1.0",
     "@octokit/rest": "^21.0.2",
     "@octokit/webhooks": "^13.3.0",
     "dotenv": "^16.4.5",

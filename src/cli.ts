@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 import "dotenv/config";
 import { Octokit } from "@octokit/rest";
-import { LedgerMem } from "@ledgermem/memory";
+import { Mnemo } from "@getmnemo/memory";
 import { loadConfig } from "./config.js";
 import { backfillIssuesAndPRs } from "./backfill.js";
 
 async function main(): Promise<void> {
   const cfg = loadConfig();
   const octokit = new Octokit({ auth: cfg.token });
-  const memory = new LedgerMem({
-    apiKey: cfg.ledgermemApiKey,
-    workspaceId: cfg.ledgermemWorkspaceId,
+  const memory = new Mnemo({
+    apiKey: cfg.getmnemoApiKey,
+    workspaceId: cfg.getmnemoWorkspaceId,
   });
   const result = await backfillIssuesAndPRs({
     octokit,

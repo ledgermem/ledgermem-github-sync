@@ -3,8 +3,8 @@ export interface GitHubConfig {
   owner: string;
   repo: string;
   webhookSecret: string;
-  ledgermemApiKey: string;
-  ledgermemWorkspaceId: string;
+  getmnemoApiKey: string;
+  getmnemoWorkspaceId: string;
   port: number;
 }
 
@@ -12,8 +12,8 @@ const REQUIRED = [
   "GITHUB_TOKEN",
   "GITHUB_REPO",
   "GITHUB_WEBHOOK_SECRET",
-  "LEDGERMEM_API_KEY",
-  "LEDGERMEM_WORKSPACE_ID",
+  "GETMNEMO_API_KEY",
+  "GETMNEMO_WORKSPACE_ID",
 ] as const;
 
 export function loadConfig(): GitHubConfig {
@@ -31,8 +31,8 @@ export function loadConfig(): GitHubConfig {
     owner,
     repo: name,
     webhookSecret: process.env.GITHUB_WEBHOOK_SECRET as string,
-    ledgermemApiKey: process.env.LEDGERMEM_API_KEY as string,
-    ledgermemWorkspaceId: process.env.LEDGERMEM_WORKSPACE_ID as string,
+    getmnemoApiKey: process.env.GETMNEMO_API_KEY as string,
+    getmnemoWorkspaceId: process.env.GETMNEMO_WORKSPACE_ID as string,
     port: Number(process.env.PORT ?? 3000),
   };
 }

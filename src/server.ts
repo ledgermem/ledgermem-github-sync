@@ -1,13 +1,13 @@
 import "dotenv/config";
 import express, { type Request, type Response } from "express";
 import { Webhooks } from "@octokit/webhooks";
-import { LedgerMem } from "@ledgermem/memory";
+import { Mnemo } from "@getmnemo/memory";
 import { loadConfig } from "./config.js";
 import { ingestEntity } from "./ingest.js";
 
 export function buildApp(deps: {
   webhookSecret: string;
-  memory: { add: LedgerMem["add"] };
+  memory: { add: Mnemo["add"] };
   owner: string;
   repo: string;
 }): express.Express {
@@ -150,9 +150,9 @@ export function buildApp(deps: {
 
 async function main(): Promise<void> {
   const cfg = loadConfig();
-  const memory = new LedgerMem({
-    apiKey: cfg.ledgermemApiKey,
-    workspaceId: cfg.ledgermemWorkspaceId,
+  const memory = new Mnemo({
+    apiKey: cfg.getmnemoApiKey,
+    workspaceId: cfg.getmnemoWorkspaceId,
   });
   const app = buildApp({
     webhookSecret: cfg.webhookSecret,
